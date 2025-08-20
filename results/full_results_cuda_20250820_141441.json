@@ -1,0 +1,75 @@
+{
+  "iris": {
+    "dataset_info": {
+      "description": "Классификация ирисов (3 класса, 4 признака)",
+      "domain": "general",
+      "type": "multiclass",
+      "feature_names": [
+        "sepal length (cm)",
+        "sepal width (cm)",
+        "petal length (cm)",
+        "petal width (cm)"
+      ],
+      "target_names": [
+        "setosa",
+        "versicolor",
+        "virginica"
+      ],
+      "data_shape": [
+        150,
+        4
+      ]
+    },
+    "models": {
+      "Random Forest": {
+        "training_time": 0.17698907852172852,
+        "accuracy": 0.9111111111111111,
+        "needs_scaling": false,
+        "description": "Ансамбль решающих деревьев",
+        "color": "#2E8B57",
+        "use_cuda": false,
+        "trust_results": {
+          "trust_score": 0.6932594603089282,
+          "trust_level": "Умеренное доверие",
+          "explainability_score": 0.36231531743898726,
+          "robustness_index": 0.8277777777777778,
+          "bias_shift_index": 0.001,
+          "concept_drift_rate": 0.001,
+          "components": {
+            "explainability_component": 0.1449261269755949,
+            "robustness_component": 0.24833333333333335,
+            "fairness_component": 0.3,
+            "drift_penalty": 1.0
+          },
+          "weights_used": {
+            "w_E": 0.4,
+            "w_R": 0.3,
+            "w_F": 0.3,
+            "gamma": 1.0
+          },
+          "domain": "general",
+          "detailed_results": {
+            "explainability_details": {
+              "explainability_score": 0.36231531743898726,
+              "causal_fidelity": 0.7842105263157895,
+              "semantic_coherence": 0.09017386514750136,
+              "interpretation_stability": 0.5,
+              "human_comprehensibility": 0
+            },
+            "robustness_details": {
+              "robustness_index": 0.8277777777777778,
+              "adversarial_robustness": 0.9555555555555556,
+              "noise_robustness": 0.9851851851851853,
+              "explanation_robustness": 0.5
+            },
+            "bias_details": {
+              "bias_shift_index": 0.0
+            },
+            "drift_details": {
+              "concept_drift_rate": 0.0
+            }
+          },
+          "recommendations": [
+            "Рекомендуется улучшить качество объяснений модели"
+          ],
+          "evaluation_timestamp": 
