@@ -1,0 +1,7 @@
+﻿Model,Accuracy,Trust_Score,Training_Time,CUDA,Description
+Gradient Boosting,0.967,0.775,0.336,False,Градиентный бустинг
+MLP Neural Network (CPU),0.913,0.819,0.065,False,Многослойный персептрон (CPU)
+MLP Neural Network (CUDA),0.922,0.708,0.387,False,Многослойный персептрон (CPU адаптивный)
+Random Forest,0.963,0.782,0.172,False,Ансамбль решающих деревьев
+Support Vector Machine,0.969,0.835,0.01,False,Метод опорных векторов
+XANFIS,0.42,0.751,0.304,False,Adaptive Neuro-Fuzzy Inference System

@@ -22,22 +22,22 @@
     },
     "models": {
       "Random Forest": {
-        "training_time": 0.17698907852172852,
+        "training_time": 0.18825340270996094,
         "accuracy": 0.9111111111111111,
         "needs_scaling": false,
         "description": "Ансамбль решающих деревьев",
         "color": "#2E8B57",
         "use_cuda": false,
         "trust_results": {
-          "trust_score": 0.6932594603089282,
+          "trust_score": 0.7939643263106091,
           "trust_level": "Умеренное доверие",
-          "explainability_score": 0.36231531743898726,
-          "robustness_index": 0.8277777777777778,
+          "explainability_score": 0.5,
+          "robustness_index": 0.9798810877020304,
           "bias_shift_index": 0.001,
           "concept_drift_rate": 0.001,
           "components": {
-            "explainability_component": 0.1449261269755949,
-            "robustness_component": 0.24833333333333335,
+            "explainability_component": 0.2,
+            "robustness_component": 0.2939643263106091,
             "fairness_component": 0.3,
             "drift_penalty": 1.0
           },
@@ -45,22 +45,44 @@
             "w_E": 0.4,
             "w_R": 0.3,
             "w_F": 0.3,
-            "gamma": 1.0
+            "gamma": 1.0,
+            "description": "Универсальные системы с балансом метрик"
           },
           "domain": "general",
+          "analysis_params": {
+            "n_samples_used": 100,
+            "has_reference_data": false,
+            "has_protected_attributes": false,
+            "total_test_samples": 45
+          },
           "detailed_results": {
             "explainability_details": {
-              "explainability_score": 0.36231531743898726,
-              "causal_fidelity": 0.7842105263157895,
-              "semantic_coherence": 0.09017386514750136,
+              "explainability_score": 0.5,
+              "causal_fidelity": 0.5,
+              "semantic_coherence": 0.5,
               "interpretation_stability": 0.5,
-              "human_comprehensibility": 0
+              "human_comprehensibility": 0.5,
+              "n_causal_edges": 0,
+              "n_expert_edges": 0
             },
             "robustness_details": {
-              "robustness_index": 0.8277777777777778,
-              "adversarial_robustness": 0.9555555555555556,
-              "noise_robustness": 0.9851851851851853,
-              "explanation_robustness": 0.5
+              "robustness_index": 0.9798810877020304,
+              "adversarial_robustness": 0.9694444444444444,
+              "noise_robustness": 0.9891932981949252,
+              "explanation_robustness": 0.9844844015525837,
+              "robustness_level": "Excellent",
+              "similarity_metric": "cosine",
+              "epsilon_levels": [
+                0.01,
+                0.05,
+                0.1,
+                0.2
+              ],
+              "weights": {
+                "w_adversarial": 0.4,
+                "w_noise": 0.3,
+                "w_explanation": 0.3
+              }
             },
             "bias_details": {
               "bias_shift_index": 0.0
@@ -70,6 +92,6 @@
             }
           },
           "recommendations": [
-            "Рекомендуется улучшить качество объяснений модели"
+            "✅ Система демонстрирует хороший уровень доверия во всех аспектах"
           ],
           "evaluation_timestamp": 

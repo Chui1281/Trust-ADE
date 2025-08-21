@@ -107,33 +107,26 @@ class TrustADE:
 
         return SimpleExplainer(self.model)
 
-    def evaluate(self, X_test, y_test, X_reference=None, y_reference=None,
-                 protected_data=None, expert_ratings=None, verbose=True):
+    def evaluate(self, X_test, y_test, protected_data=None, X_reference=None,
+                 expert_ratings=None, n_samples=100, verbose=True):
         """
-        Основная функция комплексной оценки доверия к ИИ-системе
+        Комплексная оценка Trust-ADE с обновленными параметрами
 
         Args:
-            X_test: тестовые входные данные
-            y_test: тестовые целевые переменные
-            X_reference: референсные данные для сравнения (опционально)
-            y_reference: референсные целевые переменные (опционально)
-            protected_data: данные о защищенных атрибутах (опционально)
-            expert_ratings: экспертные оценки понятности (опционально)
-            verbose: выводить ли промежуточные сообщения
-
-        Returns:
-            dict: полные результаты оценки доверия
+            n_samples: количество образцов для анализа устойчивости
+            verbose: детальный вывод прогресса
         """
         try:
             if verbose:
                 print("🔍 Запуск комплексной оценки Trust-ADE...")
+                print(f"📊 Анализируем {len(X_test)} образцов с {n_samples} тестами устойчивости")
 
             # Валидация входных данных
             X_test, y_test = validate_inputs(X_test, y_test)
 
             # Проверка совместимости explainer
             if not check_explainer_compatibility(self.explainer):
-                warnings.warn("Explainer может быть несовместим")
+                warnings.warn("⚠️ Explainer может быть несовместим с Trust-ADE")
 
             # 1. Вычисление Explainability Score
             if verbose:
@@ -146,12 +139,14 @@ class TrustADE:
             )
             es = es_results['explainability_score']
 
-            # 2. Вычисление Robustness Index
+            # 2. Вычисление Robustness Index с новыми параметрами
             if verbose:
                 print("🛡️ Вычисляем Robustness Index...")
 
             ri_results = self.ri_calculator.calculate(
-                self.model, self.explainer, X_test, y_test
+                self.model, self.explainer, X_test, y_test,
+                n_samples=n_samples,  # 🔥 НОВЫЙ ПАРАМЕТР
+                verbose=verbose  # 🔥 НОВЫЙ ПАРАМЕТР
             )
             ri = ri_results['robustness_index']
 
@@ -169,12 +164,13 @@ class TrustADE:
 
                     bsi_results = self.bsi_calculator.calculate(
                         y_test, y_pred_current, y_pred_baseline, protected_data
+                        # Используем веса по умолчанию из инициализации класса
                     )
                     bsi = bsi_results['bias_shift_index']
                 except Exception as e:
-                    warnings.warn(f"Ошибка вычисления BSI: {str(e)}")
+                    warnings.warn(f"🚨 Ошибка вычисления BSI: {str(e)}")
 
-            # 4. Вычисление Concept Drift Rate (только если есть базовые данные)
+            # 4. Concept Drift Rate остается без изменений
             cdr = 0.0
             cdr_results = {'concept_drift_rate': 0.0}
 
@@ -191,7 +187,7 @@ class TrustADE:
                     )
                     cdr = cdr_results['concept_drift_rate']
                 except Exception as e:
-                    warnings.warn(f"Ошибка вычисления CDR: {str(e)}")
+                    warnings.warn(f"🚨 Ошибка вычисления CDR: {str(e)}")
 
             # 5. Вычисление итогового Trust Score
             if verbose:
@@ -199,7 +195,7 @@ class TrustADE:
 
             trust_results = self.trust_calc.calculate_trust_score(es, ri, bsi, cdr)
 
-            # Объединение всех результатов
+            # Объединение результатов с дополнительной информацией
             final_results = {
                 'trust_score': trust_results['trust_score'],
                 'trust_level': self.trust_calc.get_trust_level_description(trust_results['trust_score']),
@@ -210,6 +206,12 @@ class TrustADE:
                 'components': trust_results['components'],
                 'weights_used': trust_results['weights_used'],
                 'domain': self.domain,
+                'analysis_params': {  # 🔥 НОВАЯ СЕКЦИЯ
+                    'n_samples_used': n_samples,
+                    'has_reference_data': X_reference is not None,
+                    'has_protected_attributes': protected_data is not None,
+                    'total_test_samples': len(X_test)
+                },
                 'detailed_results': {
                     'explainability_details': es_results,
                     'robustness_details': ri_results,
@@ -227,27 +229,16 @@ class TrustADE:
             if verbose:
                 print(f"✅ Оценка завершена! Trust Score: {final_results['trust_score']:.3f}")
                 print(f"📊 Уровень доверия: {final_results['trust_level']}")
+                print(f"🛡️ Robustness: {ri:.3f} | ⚖️ Fairness: {1 - bsi:.3f} | 📊 Explainability: {es:.3f}")
 
             return final_results
 
         except Exception as e:
-            error_msg = f"Критическая ошибка при выполнении оценки Trust-ADE: {str(e)}"
+            error_msg = f"🚨 Критическая ошибка в оценке Trust-ADE: {str(e)}"
             warnings.warn(error_msg)
-
-            # Возвращаем базовые результаты при ошибке
-            error_results = {
-                'trust_score': 0.0,
-                'trust_level': 'Ошибка оценки',
-                'explainability_score': 0.0,
-                'robustness_index': 0.0,
-                'bias_shift_index': 0.0,
-                'concept_drift_rate': 0.0,
-                'error': error_msg,
-                'evaluation_timestamp': np.datetime64('now')
-            }
-
-            self.last_results = error_results
-            return error_results
+            if verbose:
+                print(error_msg)
+            return None
 
     def generate_report(self, results=None, output_file=None):
         """
