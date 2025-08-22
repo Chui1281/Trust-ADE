@@ -122,7 +122,7 @@ class BiasShiftIndex:
 
             final_dp = enhanced_dp_delta + baseline_model_bias
 
-            return np.clip(final_dp, 0.001, 1.0)
+            return np.clip(final_dp, 0.0001, 1.0)
 
         except Exception as e:
             warnings.warn(f"🚨 Ошибка в demographic_parity_shift: {str(e)}")
@@ -195,7 +195,7 @@ class BiasShiftIndex:
 
             final_eo = enhanced_eo_delta + baseline_model_bias
 
-            return np.clip(final_eo, 0.001, 1.0)
+            return np.clip(final_eo, 0.0001, 1.0)
 
         except Exception as e:
             warnings.warn(f"🚨 Ошибка в equalized_odds_shift: {str(e)}")
@@ -254,7 +254,7 @@ class BiasShiftIndex:
 
             final_cf = enhanced_cf_delta + baseline_model_bias
 
-            return np.clip(final_cf, 0.001, 1.0)
+            return np.clip(final_cf, 0.0001, 1.0)
 
         except Exception as e:
             warnings.warn(f"🚨 Ошибка в calibrated_fairness_shift: {str(e)}")
@@ -319,7 +319,7 @@ class BiasShiftIndex:
 
             final_explanation = enhanced_explanation_delta + baseline_explanation_bias
 
-            return np.clip(final_explanation, 0.001, 1.0)
+            return np.clip(final_explanation, 0.0001, 1.0)
 
         except Exception as e:
             warnings.warn(f"🚨 Ошибка в explanation_fairness_shift: {str(e)}")
@@ -352,7 +352,7 @@ class BiasShiftIndex:
             # Дополнительная модель-специфичная калибровка
             calibrated_bs_index = self._calibrate_bias_index(raw_bs_index, algorithm_name)
 
-            return np.clip(calibrated_bs_index, 0.001, 1.0)
+            return np.clip(calibrated_bs_index, 0.0001, 1.0)
 
         except Exception as e:
             warnings.warn(f"🚨 Ошибка в calculate_bias_shift_index: {str(e)}")

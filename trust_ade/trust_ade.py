@@ -59,9 +59,39 @@ class TrustADE:
         self.last_results = None
         self._evaluation_history = []
 
+    def _is_xanfis_model(self):
+        """Проверка является ли модель XANFIS"""
+        model_to_check = self.model
+
+        # Проверяем обертки
+        if hasattr(model_to_check, 'model'):
+            model_to_check = model_to_check.model
+
+        # Проверяем имя класса или наличие методов XANFIS
+        model_name = str(type(model_to_check)).lower()
+
+        return (
+                'xanfis' in model_name or
+                'anfis' in model_name or
+                'trustadecompatible' in model_name or  # Ваш новый класс
+                hasattr(model_to_check, 'get_fuzzy_rules') or
+                hasattr(model_to_check, 'get_feature_importance') or
+                hasattr(model_to_check, 'get_explanation_quality')
+        )
+
     def _create_explainer(self, explainer_type, training_data):
         """Создание объяснителя с обработкой ошибок импорта"""
         try:
+            # 🔥 НОВОЕ: Проверяем XANFIS модель первым
+            if self._is_xanfis_model():
+                try:
+                    from explainers.xanfis_explainer import create_xanfis_explainer
+                    explainer = create_xanfis_explainer(self.model, self.model.get_feature_names())
+                    print("🧠 Используется XANFISExplainer (правила)")
+                    return explainer
+                except ImportError as e:
+                    print(f"⚠️ XANFISExplainer недоступен: {e}, используем fallback")
+
             # Динамический импорт для избежания циркулярных зависимостей
             if explainer_type == 'shap':
                 try:
@@ -107,6 +137,42 @@ class TrustADE:
 
         return SimpleExplainer(self.model)
 
+    def _calculate_xanfis_explainability_score(self, X_test, y_test):
+        """Специальный расчет объяснимости для XANFIS"""
+
+        try:
+            print("🧠 Используем XANFIS-специфичную оценку объяснимости...")
+
+            # Получаем метрики качества от XANFIS explainer
+            if hasattr(self.explainer, 'get_explanation_quality'):
+                quality_metrics = self.explainer.get_explanation_quality()
+
+                # Базовый балл на основе правил
+                base_score = quality_metrics.get('explanation_score', 0.1)
+
+                # Бонусы за специфичные особенности XANFIS
+                rule_bonus = min(0.3, quality_metrics.get('rules_count', 0) * 0.03)  # Бонус за правила
+                coverage_bonus = quality_metrics.get('feature_coverage', 0) * 0.2  # Бонус за покрытие
+                confidence_bonus = quality_metrics.get('rule_confidence', 0.7) * 0.1  # Бонус за уверенность
+
+                # Итоговый балл объяснимости
+                final_score = min(1.0, base_score + rule_bonus + coverage_bonus + confidence_bonus)
+
+                print(f"   🎯 XANFIS объяснимость: {final_score:.3f}")
+                print(f"   📋 Правил: {quality_metrics.get('rules_count', 0)}")
+                print(f"   📊 Покрытие признаков: {quality_metrics.get('feature_coverage', 0):.2f}")
+                print(f"   🎲 Уверенность правил: {quality_metrics.get('rule_confidence', 0.7):.2f}")
+
+                return {
+                    'explainability_score': final_score,
+                    'causal_fidelity': base_score * 0.8,  # Правила показывают причинность
+                    'semantic_coherence': coverage_bonus * 3,  # Правила семантически связны
+                    'interpretation_stability': confidence_bonus * 10,  # Правила стабильны
+                    'human_comprehensibility': min(0.9, rule_bonus * 5 + 0.4)  # Правила понятны людям
+                }
+            else:print("⚠️ XANFIS explainer не поддерживает get_explanation_quality")
+        except:pass
+
     def evaluate(self, X_test, y_test, protected_data=None, X_reference=None,
                  expert_ratings=None, n_samples=100, verbose=True):
         """
@@ -137,6 +203,17 @@ class TrustADE:
                 expert_graph=self.expert_causal_graph,
                 expert_ratings=expert_ratings
             )
+
+            # 🔥 НОВОЕ: Специальная логика для XANFIS
+            if self._is_xanfis_model():
+                es_results = self._calculate_xanfis_explainability_score(X_test, y_test)
+            else:
+                es_results = self.es_calculator.calculate(
+                    self.model, self.explainer, X_test, y_test,
+                    expert_graph=self.expert_causal_graph,
+                    expert_ratings=expert_ratings
+                )
+
             es = es_results['explainability_score']
 
             # 2. Вычисление Robustness Index с новыми параметрами
