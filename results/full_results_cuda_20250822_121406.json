@@ -22,22 +22,22 @@
     },
     "models": {
       "Random Forest": {
-        "training_time": 0.18825340270996094,
+        "training_time": 0.1793375015258789,
         "accuracy": 0.9111111111111111,
         "needs_scaling": false,
         "description": "Ансамбль решающих деревьев",
         "color": "#2E8B57",
         "use_cuda": false,
         "trust_results": {
-          "trust_score": 0.7939643263106091,
+          "trust_score": 0.6673741708719105,
           "trust_level": "Умеренное доверие",
-          "explainability_score": 0.5,
-          "robustness_index": 0.9798810877020304,
+          "explainability_score": 0.18180461334483033,
+          "robustness_index": 0.9821744184465946,
           "bias_shift_index": 0.001,
           "concept_drift_rate": 0.001,
           "components": {
-            "explainability_component": 0.2,
-            "robustness_component": 0.2939643263106091,
+            "explainability_component": 0.07272184533793213,
+            "robustness_component": 0.29465232553397835,
             "fairness_component": 0.3,
             "drift_penalty": 1.0
           },
@@ -57,19 +57,20 @@
           },
           "detailed_results": {
             "explainability_details": {
-              "explainability_score": 0.5,
-              "causal_fidelity": 0.5,
-              "semantic_coherence": 0.5,
-              "interpretation_stability": 0.5,
-              "human_comprehensibility": 0.5,
+              "explainability_score": 0.18180461334483033,
+              "causal_fidelity": 0.07993428306022465,
+              "semantic_coherence": 0.09351326570649927,
+              "interpretation_stability": 0.1944706163530707,
+              "human_comprehensibility": 0.16844815709529404,
               "n_causal_edges": 0,
-              "n_expert_edges": 0
+              "n_expert_edges": 0,
+              "algorithm_name": "unknown"
             },
             "robustness_details": {
-              "robustness_index": 0.9798810877020304,
-              "adversarial_robustness": 0.9694444444444444,
-              "noise_robustness": 0.9891932981949252,
-              "explanation_robustness": 0.9844844015525837,
+              "robustness_index": 0.9821744184465946,
+              "adversarial_robustness": 0.9708333333333333,
+              "noise_robustness": 0.9883382020644225,
+              "explanation_robustness": 0.9911320816464481,
               "robustness_level": "Excellent",
               "similarity_metric": "cosine",
               "epsilon_levels": [
@@ -82,6 +83,11 @@
                 "w_adversarial": 0.4,
                 "w_noise": 0.3,
                 "w_explanation": 0.3
+              },
+              "optimization_info": {
+                "cuda_used": false,
+                "batch_size": 1000,
+                "cache_hits": 0
               }
             },
             "bias_details": {
@@ -92,6 +98,7 @@
             }
           },
           "recommendations": [
-            "✅ Система демонстрирует хороший уровень доверия во всех аспектах"
+            "📊 Объяснимость (0.073) ниже порога для домена 'general'. Рекомендации: улучшить каузальную точность объяснений, добавить контекстную адаптацию, повысить семантическую когерентность",
+            "⚖️ Компоненты доверия несбалансированы. Рекомендация: рассмотреть адаптивную калибровку весов или корректировку доменных приоритетов"
           ],
           "evaluation_timestamp": 
