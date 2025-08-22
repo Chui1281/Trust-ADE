@@ -104,21 +104,46 @@ trust_ade/
 │   ├── concept_drift.py       # Мониторинг дрейфа концептов
 │   ├── base_model.py          # Базовый интерфейс моделей
 │   └── utils.py              # Вспомогательные утилиты
+|
+├── 📁 config/                    # Конфигурация и настройки
+│   └── settings.py               # Глобальные настройки, CUDA конфиг
 │
 ├── 📁 models/                 # Интеграции ML моделей
 │   ├── sklearn_wrapper.py     # Обертка для Scikit-learn
+|   ├── wrappers.py              # Базовые обертки
+│   |── cuda_models.py           # CUDA-оптимизированные модели
 │   └── __init__.py
 │
 ├── 📁 explainers/             # Модули объяснимости
 │   ├── shap_explainer.py     # SHAP интеграция
 │   └── __init__.py
 │
-├── 📁 examples/               # Примеры использования
-│   ├── demo_trust_ade.py      # Базовая демонстрация
-│   └── advanced_model_comparison.py  # Сравнение моделей
+├── 📁 data/                     # Работа с данными
+│   └── datasets.py              # Загрузка и подготовка датасетов
+│
+├── 📁 training/                 # Обучение моделей
+│   └── trainers.py              # Тренировка всех типов моделей
+│
+├── 📁 evaluation/               # Оценка и Trust-ADE
+│   └── trust_evaluator.py      # Trust-ADE протокол оценки
+│
+├── 📁 visualization/            # Визуализация результатов
+│   └── charts.py                # Создание графиков и отчетов
+│
+├── 📁 utils/                    # Утилиты
+│   └── io_utils.py              # Сохранение/загрузка результатов
+│
+├── 📁 analysis/                 # Анализ результатов
+│   └── results.py               # Финальный анализ и сравнение
+│
+├── 📁 cli/                      # Командная строка
+│   └── dataset_selector.py     # CLI для выбора датасетов
+│
+├── 📄 main.py                   # Главный скрипт запуска
 │
 ├── 📁 tests/                  # Тесты
 │   ├── test_basic.py         # Базовые тесты
+|   ├── demo_trust_ade.py      # Базовая демонстрация
 │   └── test_installation.py  # Проверка установки
 │
 └── 📁 results/                # Результаты анализа
@@ -160,97 +185,99 @@ scipy>=1.7.0
 tqdm>=4.62.0
 ```
 
-
 ## 🚀 Быстрый старт
 
-### Базовое использование
+### 1. Запуск на всех датасетах
 
-```python
-from trust_ade import TrustADE
-from models.sklearn_wrapper import SklearnWrapper
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-
-# Загрузка данных
-X, y = load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-# Обучение модели
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X_train, y_train)
-
-# Обертка модели для Trust-ADE
-wrapped_model = SklearnWrapper(
-    model=model,
-    feature_names=[f'feature_{i}' for i in range(X.shape[^1])]
-)
-
-# Инициализация Trust-ADE
-trust_evaluator = TrustADE(
-    model=wrapped_model,
-    domain='medical',          # медицинский домен
-    training_data=X_train,
-    verbose=True
-)
-
-# Выполнение оценки Trust-ADE
-results = trust_evaluator.evaluate(X_test, y_test)
-
-# Результаты
-print(f"🎯 Trust Score: {results['trust_score']:.3f}")
-print(f"📊 Trust Level: {results['trust_level']}")
-print(f"🔍 Explainability Score: {results.get('explainability_score', 'N/A')}")
-print(f"🛡️ Robustness Index: {results.get('robustness_index', 'N/A')}")
-print(f"📈 Concept Drift Rate: {results.get('concept_drift_rate', 'N/A')}")
-print(f"⚖️ Bias Shift Index: {results.get('bias_shift_index', 'N/A')}")
+```bash
+python main.py
 ```
 
 
-### Сравнение моделей
+### 2. Выборочный запуск
 
-```python
-# Запуск полного сравнения
-python examples/advanced_model_comparison.py
+```bash
+# Только конкретные датасеты
+python main.py --datasets iris breast_cancer
 
-# Демонстрация базовых функций
-python examples/demo_trust_ade.py
+# Исключить большие датасеты
+python main.py --exclude digits_binary
+
+# Быстрое тестирование
+python main.py --datasets iris wine --quick
+
+# Только CUDA модели
+python main.py --cuda-only
+
+# Подробный вывод
+python main.py --datasets breast_cancer --verbose
 ```
 
 
-## 🎯 Доменно-специфичная настройка
+### 3. Помощь по командам
 
-### Конфигурации по доменам
-
-```python
-DOMAIN_CONFIGS = {
-    'medical': {
-        'w_E': 0.5,  # Максимальный приоритет объяснимости
-        'w_R': 0.3,  # Умеренная важность устойчивости  
-        'w_F': 0.2,  # Базовая важность справедливости
-        'gamma': 2.0,  # Высокая чувствительность к дрейфу
-    },
-    'financial': {
-        'w_E': 0.3,  # Сбалансированная объяснимость
-        'w_R': 0.4,  # Высокий приоритет устойчивости
-        'w_F': 0.3,  # Важность справедливости  
-        'gamma': 1.5,  # Средняя чувствительность к дрейфу
-    },
-    'criminal_justice': {
-        'w_E': 0.3,  # Умеренная объяснимость
-        'w_R': 0.2,  # Низкий приоритет устойчивости
-        'w_F': 0.5,  # Максимальная важность справедливости
-        'gamma': 2.5,  # Очень высокая чувствительность
-    },
-    'general': {
-        'w_E': 0.4,  # Сбалансированные веса
-        'w_R': 0.3,
-        'w_F': 0.3,
-        'gamma': 1.0,
-    }
-}
+```bash
+python main.py --help
 ```
 
+
+## 🎯 Основные возможности
+
+### ✅ Поддерживаемые модели
+
+- **Random Forest** - Ансамбль решающих деревьев
+- **MLP Neural Network (CPU)** - Многослойный персептрон (sklearn)
+- **MLP Neural Network (CUDA)** - Оптимизированная PyTorch модель с GPU
+- **Support Vector Machine** - Метод опорных векторов
+- **Gradient Boosting** - Градиентный бустинг
+- **XANFIS** - Adaptive Neuro-Fuzzy система (опционально)
+
+
+### 📊 Поддерживаемые датасеты
+
+- **Iris** - Классификация ирисов (3 класса, 4 признака)
+- **Breast Cancer** - Диагностика рака молочной железы (2 класса, 30 признаков)
+- **Wine** - Классификация вин (3 класса, 13 признаков)
+- **Digits Binary** - Распознавание цифры 0 (2 класса, 64 пикселя)
+
+
+### 🔬 Trust-ADE метрики
+
+- **Trust Score** - Итоговая оценка доверия (0-1)
+- **Explainability Score** - Качество объяснений
+- **Robustness Index** - Устойчивость к возмущениям
+- **Bias Shift Index** - Индекс предвзятости
+- **Concept Drift Rate** - Скорость дрейфа концептов
+
+
+## 📈 Результаты работы
+
+### Генерируемые файлы
+
+```
+results/
+├── detailed_comparison_cuda_20250822_143052.csv    # Подробные результаты
+├── summary_comparison_cuda_20250822_143052.csv     # Краткая сводка
+├── full_results_cuda_20250822_143052.json         # Полные данные
+├── fixed_main_comparison_20250822_143052.png       # Основной график
+├── trust_metrics_analysis_fixed_20250822_143052.png # Анализ метрик
+├── cuda_performance_detailed_20250822_143052.png   # CUDA vs CPU
+└── correlation_analysis_fixed_20250822_143052.png  # Корреляции
+```
+
+
+### Пример вывода
+
+```bash
+🎯 ОБЩИЙ РЕЙТИНГ МОДЕЛЕЙ (средний Trust Score):
+  🥇 MLP Neural Network (CUDA): 0.847 ± 0.023 (на 4 датасетах) 🚀
+  🥈 Random Forest: 0.832 ± 0.019 (на 4 датасетах) 💻
+  🥉 Gradient Boosting: 0.798 ± 0.031 (на 4 датасетах) 💻
+
+🚀 ПРОИЗВОДИТЕЛЬНОСТЬ CUDA vs CPU:
+  🚀 CUDA модели: Trust Score = 0.847, Время = 2.34s
+  💻 CPU модели: Trust Score = 0.815, Время = 8.91s
+```
 
 ## 📊 Шкала зрелости объяснимости L0-L6
 
@@ -264,96 +291,272 @@ DOMAIN_CONFIGS = {
 | **L5** | Контекстно-адаптивные объяснения | ✅ **Trust-ADE L5** |
 | **L6** | Автономные самопоясняющиеся системы | 🚧 В разработке |
 
-## ⚙️ API Документация
 
-### Основные классы
+## 🛠️ Программное API
 
-#### TrustADE
+### Основное использование
 
 ```python
-class TrustADE:
-    def __init__(self, model, domain='general', training_data=None, verbose=False):
-        """
-        Инициализация системы оценки доверия Trust-ADE
-        
-        Args:
-            model: Обернутая ML модель
-            domain: Домен применения ('medical', 'financial', 'criminal_justice', 'general')
-            training_data: Тренировочные данные для baseline метрик
-            verbose: Детальный вывод процесса оценки
-        """
-        
-    def evaluate(self, X_test, y_test):
-        """
-        Комплексная оценка доверия по протоколу Trust-ADE
-        
-        Returns:
-            dict: Результаты оценки с детальными метриками
-        """
-        
-    def explain_predictions(self, X, method='shap'):
-        """Генерация объяснений для предсказаний"""
-        
-    def monitor_drift(self, X_new, window_size=100):
-        """Мониторинг concept drift в реальном времени"""
+from data.datasets import prepare_datasets, create_models_config
+from training.trainers import train_models
+from evaluation.trust_evaluator import enhanced_trust_ade_evaluation
+from sklearn.model_selection import train_test_split
+
+# Подготовка данных
+datasets = prepare_datasets()
+models_config = create_models_config()
+
+# Выбор датасета
+dataset_name = 'breast_cancer'
+dataset_info = datasets[dataset_name]
+X, y = dataset_info['X'], dataset_info['y']
+
+# Разделение данных
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+# Обучение моделей
+trained_models = train_models(
+    X_train, X_test, y_train, y_test,
+    dataset_info['feature_names'], models_config,
+    dataset_info['type'], dataset_name
+)
+
+# Trust-ADE оценка
+enhanced_trust_ade_evaluation(
+    trained_models, X_test, y_test, 
+    dataset_info['domain'], X_train
+)
+
+# Результаты доступны в trained_models[model_name]['trust_results']
 ```
 
 
-#### TrustCalculator
+### Кастомная модель
 
 ```python
-class TrustCalculator:
-    def calculate_trust_score(self, explainability_score, robustness_index, 
-                             bias_shift_index, concept_drift_rate, verbose=False):
-        """
-        Вычисление итогового Trust-ADE Score
-        
-        Returns:
-            dict: Детальные результаты с компонентами доверия
-        """
-        
-    def adaptive_weight_calibration(self, expert_ratings, computed_scores):
-        """Адаптивная калибровка весов по экспертным оценкам"""
-        
-    def get_recommendations(self, trust_results):
-        """Получение рекомендаций по улучшению доверия"""
+from models.wrappers import SklearnWrapper
+from sklearn.ensemble import ExtraTreesClassifier
+
+# Создание кастомной модели
+custom_model = ExtraTreesClassifier(n_estimators=150, random_state=42)
+custom_model.fit(X_train, y_train)
+
+# Обертка для Trust-ADE
+wrapped_model = SklearnWrapper(
+    model=custom_model,
+    feature_names=[f"feature_{i}" for i in range(X_train.shape[^1])]
+)
+
+# Добавление в trained_models для оценки
+trained_models['Custom Extra Trees'] = {
+    'wrapped_model': wrapped_model,
+    'scaler': None,
+    'training_time': 1.23,
+    'accuracy': 0.95,
+    'needs_scaling': False,
+    'description': 'Extra Trees Classifier',
+    'color': '#FF6B6B',
+    'use_cuda': False
+}
+```
+
+
+### Работа с CUDA моделями
+
+```python
+from models.cuda_models import OptimizedCUDAMLPClassifier
+from models.wrappers import CUDAMLPWrapper
+
+# Создание CUDA модели
+cuda_model = OptimizedCUDAMLPClassifier(
+    hidden_layers=(128, 64, 32),
+    n_classes=len(np.unique(y_train)),
+    learning_rate=0.001,
+    epochs=200,
+    dataset_size=len(X_train)
+)
+
+# Обучение
+cuda_model.fit(X_train, y_train)
+
+# Обертка
+wrapped_cuda = CUDAMLPWrapper(cuda_model, feature_names)
+```
+
+
+## ⚙️ Конфигурация
+
+### Настройка CUDA
+
+```python
+# config/settings.py
+CUDA_AVAILABLE = torch.cuda.is_available()
+DEVICE = torch.device('cuda' if CUDA_AVAILABLE else 'cpu')
+CUDA_EFFICIENT_THRESHOLD = 500  # Минимальный размер для CUDA
+```
+
+
+### Доменные конфигурации
+
+```python
+# Веса для различных доменов
+DOMAIN_CONFIGS = {
+    'medical': {'w_E': 0.5, 'w_R': 0.3, 'w_F': 0.2},
+    'financial': {'w_E': 0.3, 'w_R': 0.4, 'w_F': 0.3},
+    'general': {'w_E': 0.4, 'w_R': 0.3, 'w_F': 0.3}
+}
+```
+
+
+## 📊 Визуализация
+
+Система автоматически генерирует:
+
+1. **Основное сравнение** - Trust Score vs Accuracy
+2. **Детальный анализ метрик** - Все Trust-ADE компоненты
+3. **CUDA vs CPU сравнение** - Производительность и качество
+4. **Корреляционный анализ** - Взаимосвязи между метриками
+
+### Кастомная визуализация
+
+```python
+from visualization.charts import create_fixed_visualizations
+import pandas as pd
+
+# Подготовка данных для визуализации
+viz_data = []
+for dataset_name, results in all_results.items():
+    for model_name, model_info in results['models'].items():
+        trust_results = model_info.get('trust_results', {})
+        viz_data.append({
+            'Dataset': dataset_name,
+            'Model': model_name,
+            'Trust_Score': trust_results.get('trust_score', 0),
+            'Accuracy': model_info.get('accuracy', 0),
+            'CUDA': model_info.get('use_cuda', False)
+        })
+
+df_viz = pd.DataFrame(viz_data)
+create_fixed_visualizations(df_viz, 'results', '20250822_custom')
 ```
 
 
 ## 🧪 Тестирование
 
 ```bash
-# Запуск всех тестов
-python -m pytest tests/ -v
-
 # Проверка установки
 python tests/test_installation.py
 
 # Базовые тесты
 python tests/test_basic.py
+
+# Тест конкретного модуля
+python -c "from training.trainers import train_models; print('✅ Trainers OK')"
 ```
 
 
-## 📈 Результаты и визуализация
+## 🔧 Расширение системы
 
-После выполнения оценки система генерирует:
+### Добавление нового датасета
 
-- **CSV отчеты** с детальными метриками
-- **JSON файлы** с полными данными
-- **Графики** Trust-ADE компонентов
-- **Рекомендации** по улучшению доверия
+```python
+# data/datasets.py
+def prepare_datasets():
+    datasets = {}
+    
+    # Ваш кастомный датасет
+    datasets['custom_dataset'] = {
+        'X': your_X_data,
+        'y': your_y_data,
+        'feature_names': your_feature_names,
+        'target_names': your_target_names,
+        'description': 'Описание датасета',
+        'domain': 'your_domain',
+        'type': 'binary'  # или 'multiclass'
+    }
+    
+    return datasets
+```
 
-Пример результатов:
+
+### Новый тип модели
+
+```python
+# models/your_model.py
+from models.wrappers import SklearnWrapper
+
+class YourModelWrapper(SklearnWrapper):
+    def __init__(self, model, feature_names=None):
+        super().__init__(model, feature_names)
+    
+    def predict(self, X):
+        return self.model.predict(X)
+    
+    def predict_proba(self, X):
+        return self.model.predict_proba(X)
+```
+
+
+## 🚀 Примеры использования
+
+### Медицинская диагностика
+
+```bash
+python main.py --datasets breast_cancer --verbose
+```
+
+
+### Финансовый анализ
+
+```bash
+python main.py --datasets wine --cuda-only
+```
+
+
+### Быстрое сравнение
+
+```bash
+python main.py --datasets iris --quick
+```
+
+
+## 📄 Логи выполнения
+
+Пример подробного лога:
 
 ```
-🎯 Trust Score: 0.847
-📊 Trust Level: Высокое доверие
-🔍 Explainability Score: 0.782
-🛡️ Robustness Index: 0.891  
-📈 Concept Drift Rate: 0.124
-⚖️ Bias Shift Index: 0.156
-```
+🔬 ПРОДВИНУТОЕ СРАВНЕНИЕ ML МОДЕЛЕЙ С TRUST-ADE PROTOCOL + CUDA
+================================================================================
+📊 ТЕСТИРОВАНИЕ НА ДАТАСЕТЕ: BREAST_CANCER
+📋 Описание: Диагностика рака молочной железы (2 класса, 30 признаков)
+🏷️ Домен: medical
+🎯 Тип задачи: binary
+================================================================================
 
+  📈 Обучение Random Forest...
+    ✅ Random Forest обучен за 0.12 сек, точность: 0.965
+
+  📈 Обучение MLP Neural Network (CUDA)...
+      🚀 Используем CUDA (датасет большой: 398)
+      Epoch 0/200, Loss: 0.6891
+      Epoch 25/200, Loss: 0.1234
+    ✅ MLP Neural Network (CUDA) обучен за 2.34 сек, точность: 0.971
+    🚀 Использовалось CUDA ускорение
+
+🔍 Enhanced Trust-ADE оценка моделей...
+  📊 Оценка Random Forest...
+    🎯 Trust Score: 0.832
+    📊 Уровень доверия: Высокий
+    📈 Метрики: Bias=0.023, Drift=0.045
+
+📊 РЕЗУЛЬТАТЫ ДЛЯ BREAST_CANCER:
+Модель                              Точность   Trust Score  Уровень доверия      CUDA
+------------------------------------------------------------------------------------------
+MLP Neural Network (CUDA)          0.971      0.847        Высокий              🚀
+Random Forest                       0.965      0.832        Высокий              💻
+```
 
 ## 🔬 Научные основы
 
@@ -402,43 +605,6 @@ BSI = √(w_dp × DP_Δ² + w_eo × EO_Δ² + w_cf × CF_Δ²)
 ```
 
 
-## 🤝 Расширение системы
-
-### Добавление новой модели
-
-```python
-from trust_ade.base_model import BaseModel
-
-class CustomModelWrapper(BaseModel):
-    def __init__(self, model, feature_names=None):
-        super().__init__(model, feature_names)
-        
-    def predict(self, X):
-        return self.model.predict(X)
-        
-    def predict_proba(self, X):
-        if hasattr(self.model, 'predict_proba'):
-            return self.model.predict_proba(X)
-        return None
-        
-    def get_feature_importance(self):
-        if hasattr(self.model, 'feature_importances_'):
-            return self.model.feature_importances_
-        return None
-```
-
-
-### Кастомные метрики
-
-```python
-class CustomTrustCalculator(TrustCalculator):
-    def calculate_custom_explainability(self, model, X, y):
-        """Кастомная логика оценки объяснимости"""
-        # Ваша реализация
-        return explainability_score
-```
-
-
 ## 📄 Цитирование
 
 Если вы используете Trust-ADE в своих исследованиях, пожалуйста, цитируйте:
@@ -451,6 +617,14 @@ class CustomTrustCalculator(TrustCalculator):
   year={2025}
 }
 ```
+
+## 🤝 Вклад в проект
+
+1. Fork репозитория
+2. Создайте feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit изменения (`git commit -m 'Add amazing feature'`)
+4. Push в branch (`git push origin feature/amazing-feature`)
+5. Создайте Pull Request
 
 ## 📄 Лицензия
 
