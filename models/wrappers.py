@@ -4,7 +4,7 @@
 import numpy as np
 from sklearn.metrics import accuracy_score
 from .sklearn_wrapper import SklearnWrapper
-from trust_ade.trust_ade import TrustADE
+
 
 class CUDAMLPWrapper(SklearnWrapper):
     """Обертка для оптимизированной CUDA MLP"""

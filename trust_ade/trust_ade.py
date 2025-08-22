@@ -183,6 +183,24 @@ class TrustADE:
             verbose: детальный вывод прогресса
         """
         try:
+            # 🔥 ДОБАВИТЬ ДИАГНОСТИКУ ПЕРЕД ВЫЧИСЛЕНИЕМ МЕТРИК
+            if verbose:
+                print(f"\n🔍 ДИАГНОСТИКА ДАННЫХ ДЛЯ МЕТРИК:")
+                print(f"   📊 X_test shape: {X_test.shape}")
+                print(f"   📊 X_reference: {'Есть' if X_reference is not None else 'НЕТ'}")
+                print(f"   📊 protected_data: {'Есть' if protected_data is not None else 'НЕТ'}")
+
+                if X_reference is not None:
+                    print(f"   📊 X_reference shape: {X_reference.shape}")
+
+                if protected_data is not None:
+                    print(f"   📊 protected_data type: {type(protected_data)}")
+                    if hasattr(protected_data, '__len__'):
+                        print(f"   📊 protected_data length: {len(protected_data)}")
+                        unique_vals, counts = np.unique(protected_data, return_counts=True)
+                        print(f"   📊 Уникальные группы: {unique_vals}")
+                        print(f"   📊 Размеры групп: {counts}")
+
             if verbose:
                 print("🔍 Запуск комплексной оценки Trust-ADE...")
                 print(f"📊 Анализируем {len(X_test)} образцов с {n_samples} тестами устойчивости")
