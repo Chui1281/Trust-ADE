@@ -1,14 +1,12 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" style="height:64px;margin-right:32px"/>
-
 # 🚀 Trust-ADE: Dynamic Trust Assessment Protocol for AI Systems
 
-**Trust-ADE (Trust Assessment through Dynamic Explainability)** is a comprehensive protocol for quantitative trust assessment of artificial intelligence systems, based on the scientific study "From Correlations to Causality: The XAI 2.0 Approach and the Trust-ADE Protocol for Trustworthy AI".
+**Trust-ADE (Trust Assessment through Dynamic Explainability)** is a comprehensive protocol for quantitative trust assessment of artificial intelligence systems, based on the scientific research "From Correlations to Causality: XAI 2.0 Approach and Trust-ADE Protocol for Trustworthy AI".
 
 ## 📊 Trust-ADE Protocol
 
-### 🎯 Main Formula
+### 🎯 Core Formula
 
-The protocol aggregates three key dimensions into a single trust metric:
+The protocol aggregates three key dimensions into a unified trust metric:
 
 ```
 Trust_ADE = w_E × ES + w_R × (RI × e^(-γ × CDR)) + w_F × (1 - BSI)
@@ -21,45 +19,43 @@ Trust_ADE = w_E × ES + w_R × (RI × e^(-γ × CDR)) + w_F × (1 - BSI)
 - **CDR** - Concept-Drift Rate
 - **BSI** - Bias Shift Index
 - **w_E, w_R, w_F** - domain-specific weights
-- **γ** - drift sensitivity parameter
+- **γ** - concept drift sensitivity parameter
 
-***
 
 ### 🔍 Protocol Components
 
 #### 1. Explainability Score (ES)
 
-Assesses explanation quality via four dimensions:
+Evaluates explanation quality through four dimensions:
 
 ```
 ES = w_c × F_c + w_s × C_s + w_i × S_i + w_h × U_h
 ```
 
-- **F_c** - Causal fidelity:
+- **F_c** - Causal Fidelity:
 
 ```
 F_c = |E_sys ∩ E_exp|/|E_exp| × α + |E_sys ∩ E_exp|/|E_sys| × (1-α)
 ```
 
-- **C_s** - Semantic coherence:
+- **C_s** - Semantic Coherence:
 
 ```
 C_s = 1 - H(E)/H_max
 ```
 
-- **S_i** - Interpretation stability:
+- **S_i** - Interpretation Stability:
 
 ```
 S_i = 1 - (1/N) × Σ d(E_i, E_i^ε)
 ```
 
-- **U_h** - Human comprehension (expert assessment)
+- **U_h** - Human Comprehensibility (expert assessment)
 
-***
 
 #### 2. Robustness Index (RI)
 
-Aggregates robustness to various perturbations:
+Integrates robustness to various types of perturbations:
 
 ```
 RI = w_a × R_a + w_n × R_n + w_e × R_e
@@ -69,11 +65,10 @@ RI = w_a × R_a + w_n × R_n + w_e × R_e
 - **R_n** - Noise robustness
 - **R_e** - Explanation robustness
 
-***
 
 #### 3. Concept-Drift Rate (CDR)
 
-Measures the rate of conceptual changes:
+Measures the rate of conceptual dependency changes:
 
 ```
 CDR = λ × KS(P_t, P_t-Δt) + (1-λ) × JS(P_t, P_t-Δt)
@@ -82,86 +77,82 @@ CDR = λ × KS(P_t, P_t-Δt) + (1-λ) × JS(P_t, P_t-Δt)
 - **KS** - Kolmogorov-Smirnov statistic
 - **JS** - Jensen-Shannon divergence
 
-***
 
 #### 4. Bias Shift Index (BSI)
 
-Tracks dynamics of biases:
+Tracks bias dynamics:
 
 ```
 BSI = √(w_dp × DP_Δ² + w_eo × EO_Δ² + w_cf × CF_Δ²)
 ```
 
-- **DP_Δ** - Demographic parity change
-- **EO_Δ** - Equalized odds change
-- **CF_Δ** - Calibrated fairness change
+- **DP_Δ** - demographic parity change
+- **EO_Δ** - equalized odds change
+- **CF_Δ** - calibrated fairness change
 
-***
 
 ## 🏗️ Project Architecture
 
 ```
 trust_ade/
-├── 📁 trust_ade/             # Core protocol modules
-│   ├── trust_ade.py          # Main TrustADE class
-│   ├── trust_calculator.py   # Metric computation
-│   ├── explainability_score.py # Explainability evaluation module
-│   ├── robustness_index.py   # Robustness analysis
-│   ├── bias_shift_index.py   # Bias detection
-│   ├── concept_drift.py      # Concept drift monitoring
-│   ├── base_model.py         # Base model interface
-│   └── utils.py              # Utilities
+├── 📁 trust_ade/              # Core protocol modules
+│   ├── trust_ade.py           # Main TrustADE class  
+│   ├── trust_calculator.py    # Final metric calculation
+│   ├── explainability_score.py # Explainability assessment module
+│   ├── robustness_index.py    # Robustness analysis
+│   ├── bias_shift_index.py    # Bias detection
+│   ├── concept_drift.py       # Concept drift monitoring
+│   ├── base_model.py          # Base model interface
+│   └── utils.py              # Helper utilities
 |
-├── 📁 config/                # Config and settings
-│   └── settings.py           # Global settings, CUDA config
+├── 📁 config/                    # Configuration and settings
+│   └── settings.py               # Global settings, CUDA config
 │
-├── 📁 models/                # ML model integrations
-│   ├── sklearn_wrapper.py    # Scikit-learn wrapper
-|   ├── wrappers.py           # Basic wrappers
-│   ├── cuda_models.py        # CUDA-optimized models
+├── 📁 models/                 # ML model integrations
+│   ├── sklearn_wrapper.py     # Scikit-learn wrapper
+|   ├── wrappers.py              # Base wrappers
+│   |── cuda_models.py           # CUDA-optimized models
 │   └── __init__.py
 │
-├── 📁 explainers/            # Explainability modules
+├── 📁 explainers/             # Explainability modules
 │   ├── shap_explainer.py     # SHAP integration
 │   └── __init__.py
 │
-├── 📁 data/                  # Data utilities
-│   └── datasets.py           # Dataset loading and prepping
+├── 📁 data/                     # Data handling
+│   └── datasets.py              # Dataset loading and preparation
 │
-├── 📁 training/              # Model training
-│   └── trainers.py           # Trainers for all model types
+├── 📁 training/                 # Model training
+│   └── trainers.py              # Training for all model types
 │
-├── 📁 evaluation/            # Evaluation and Trust-ADE
-│   └── trust_evaluator.py    # Trust-ADE assessment protocol
+├── 📁 evaluation/               # Evaluation and Trust-ADE
+│   └── trust_evaluator.py      # Trust-ADE assessment protocol
 │
-├── 📁 visualization/         # Visualization
-│   └── charts.py             # Plots and report generation
+├── 📁 visualization/            # Results visualization
+│   └── charts.py                # Chart and report generation
 │
-├── 📁 utils/                 # Utilities
-│   └── io_utils.py           # Save/load results
+├── 📁 utils/                    # Utilities
+│   └── io_utils.py              # Save/load results
 │
-├── 📁 analysis/              # Result analysis
-│   └── results.py            # Final analysis and comparison
+├── 📁 analysis/                 # Results analysis
+│   └── results.py               # Final analysis and comparison
 │
-├── 📁 cli/                   # Command-line interface
-│   └── dataset_selector.py   # CLI for dataset selection
+├── 📁 cli/                      # Command line interface
+│   └── dataset_selector.py     # CLI for dataset selection
 │
-├── 📄 main.py                # Main run script
+├── 📄 main.py                   # Main execution script
 │
-├── 📁 tests/                 # Tests
+├── 📁 tests/                  # Tests
 │   ├── test_basic.py         # Basic tests
-|   ├── demo_trust_ade.py     # Demo
-│   └── test_installation.py  # Installation test
+|   ├── demo_trust_ade.py      # Basic demonstration
+│   └── test_installation.py  # Installation verification
 │
-└── 📁 results/               # Analysis results
+└── 📁 results/                # Analysis results
 ```
 
 
-***
-
 ## 📦 Installation
 
-### System requirements
+### System Requirements
 
 ```bash
 Python >= 3.8
@@ -171,7 +162,7 @@ Scikit-learn >= 1.0.0
 ```
 
 
-### Quick install
+### Quick Installation
 
 ```bash
 git clone https://github.com/your-org/trust-ade.git
@@ -195,27 +186,25 @@ tqdm>=4.62.0
 ```
 
 
-***
+## 🚀 Quick Start
 
-## 🚀 Getting Started
-
-### 1. Run on all datasets
+### 1. Run on All Datasets
 
 ```bash
 python main.py
 ```
 
 
-### 2. Selective run
+### 2. Selective Execution
 
 ```bash
-# Only specific datasets
+# Specific datasets only
 python main.py --datasets iris breast_cancer
 
 # Exclude large datasets
 python main.py --exclude digits_binary
 
-# Quick test
+# Quick testing
 python main.py --datasets iris wine --quick
 
 # CUDA models only
@@ -226,95 +215,96 @@ python main.py --datasets breast_cancer --verbose
 ```
 
 
-### 3. Help on commands
+### 3. Command Help
 
 ```bash
 python main.py --help
 ```
 
 
-***
+## 🎯 Key Features
 
-## 🎯 Key features
+### ✅ Supported Models
 
-### ✅ Supported models
-
-- **Random Forest** - Ensemble of decision trees
-- **MLP Neural Network (CPU)** - Multilayer perceptron (sklearn)
+- **XANFIS** - Adaptive Neuro-Fuzzy Inference System (🏆 **Best Trust Score**)
+- **MLP Neural Network (CPU)** - Multi-layer perceptron (sklearn)
+- **Support Vector Machine** - Support vector method
+- **Gradient Boosting** - Gradient boosting ensemble
+- **Random Forest** - Decision tree ensemble
 - **MLP Neural Network (CUDA)** - Optimized PyTorch model with GPU
-- **Support Vector Machine**
-- **Gradient Boosting**
-- **XANFIS** - Adaptive Neuro-Fuzzy System (optional)
 
 
-### 📊 Supported datasets
+### 📊 Supported Datasets
 
 - **Iris** - Iris classification (3 classes, 4 features)
 - **Breast Cancer** - Breast cancer diagnosis (2 classes, 30 features)
 - **Wine** - Wine classification (3 classes, 13 features)
-- **Digits Binary** - Zero vs other digit recognition (2 classes, 64 pixels)
+- **Digits Binary** - Digit 0 recognition (2 classes, 64 pixels)
 
 
 ### 🔬 Trust-ADE Metrics
 
-- **Trust Score** - Overall confidence (0-1)
+- **Trust Score** - Final trust assessment (0-1)
 - **Explainability Score** - Explanation quality
-- **Robustness Index** - Robustness to perturbations
+- **Robustness Index** - Perturbation resistance
 - **Bias Shift Index** - Bias index
-- **Concept Drift Rate** - Rate of concept drift
-
-***
-
-## 📈 Output
-
-### Generated files
-
-```
-results/
-├── detailed_comparison_cuda_20250822_143052.csv    # Detailed results
-├── summary_comparison_cuda_20250822_143052.csv     # Summary
-├── full_results_cuda_20250822_143052.json          # Full data
-├── fixed_main_comparison_20250822_143052.png       # Main plot
-├── trust_metrics_analysis_fixed_20250822_143052.png # Metric analysis
-├── cuda_performance_detailed_20250822_143052.png   # CUDA vs CPU
-└── correlation_analysis_fixed_20250822_143052.png  # Correlations
-```
+- **Concept Drift Rate** - Concept drift rate
 
 
-### Example output
+## 📈 Real Performance Results
+
+### Benchmark Results (4 Datasets)
+
+Based on comprehensive testing across iris, breast_cancer, wine, and digits_binary datasets:
 
 ```bash
 🎯 OVERALL MODEL RANKING (average Trust Score):
-  🥇 MLP Neural Network (CUDA): 0.847 ± 0.023 (over 4 datasets) 🚀
-  🥈 Random Forest: 0.832 ± 0.019 (over 4 datasets) 💻
-  🥉 Gradient Boosting: 0.798 ± 0.031 (over 4 datasets) 💻
-
-🚀 CUDA VS CPU PERFORMANCE:
-  🚀 CUDA models: Trust Score = 0.847, Time = 2.34s
-  💻 CPU models: Trust Score = 0.815, Time = 8.91s
+  🥇 XANFIS: 0.842 ± 0.078 (on 4 datasets) 💻
+  🥈 MLP Neural Network (CPU): 0.584 ± 0.046 (on 4 datasets) 💻
+  🥉 Support Vector Machine: 0.562 ± 0.050 (on 4 datasets) 💻
+  4️⃣ Gradient Boosting: 0.532 ± 0.099 (on 4 datasets) 💻
+  5️⃣ Random Forest: 0.517 ± 0.094 (on 4 datasets) 💻
+  6️⃣ MLP Neural Network (CUDA): 0.452 ± 0.099 (on 4 datasets) 💻
 ```
 
 
-***
+### Key Findings
+
+- **🏆 XANFIS** achieves the highest Trust Score (0.842) due to superior explainability through rule-based reasoning
+- **📊 Explainability vs Accuracy Trade-off**: Higher accuracy doesn't always mean higher trust
+- **🔍 CUDA Performance**: Interestingly, CUDA acceleration showed lower trust scores, indicating potential optimization areas
+- **📈 Consistency**: XANFIS shows good stability across different domains (±0.078 std deviation)
+
+
+### Generated Files
+
+```
+results/
+├── detailed_comparison_cuda_20250823_140323.csv    # Detailed results
+├── summary_comparison_cuda_20250823_140323.csv     # Brief summary
+├── full_results_cuda_20250823_140323.json         # Complete data
+├── fixed_main_comparison_20250823_140323.png       # Main chart
+├── trust_metrics_analysis_fixed_20250823_140323.png # Metrics analysis
+├── cuda_performance_detailed_20250823_140323.png   # CUDA vs CPU
+└── correlation_analysis_fixed_20250823_140323.png  # Correlations
+```
+
 
 ## 📊 Explainability Maturity Scale L0-L6
 
-| Level | Description | Trust-ADE Support |
-| :-- | :-- | :-- |
-| **L0** | Full opacity | ❌ |
-| **L1** | Basic post-hoc explanations | ✅ LIME, SHAP |
-| **L2** | Improved post-hoc + validation | ✅ |
-| **L3** | Partial architectural transparency | ✅ |
-| **L4** | Global interpretability | ✅ **Trust-ADE L4** |
-| **L5** | Context-adaptive explanations | ✅ **Trust-ADE L5** |
-| **L6** | Autonomous self-explaining systems | 🚧 In development |
+| Level | Description | Trust-ADE Support | XANFIS Achievement |
+| :-- | :-- | :-- | :-- |
+| **L0** | Complete opacity | ❌ | ❌ |
+| **L1** | Basic post-hoc explanations | ✅ LIME, SHAP | ❌ |
+| **L2** | Enhanced post-hoc + validation | ✅ | ❌ |
+| **L3** | Partial architectural transparency | ✅ | ❌ |
+| **L4** | Global interpretability | ✅ **Trust-ADE L4** | ✅ **XANFIS L4-L5** |
+| **L5** | Context-adaptive explanations | ✅ **Trust-ADE L5** | ✅ **XANFIS L4-L5** |
+| **L6** | Autonomous self-explaining systems | 🚧 In development | 🚧 Future work |
 
+## 🛠️ Programming API
 
-***
-
-## 🛠️ Programmatic API
-
-### Basic usage
+### Basic Usage
 
 ```python
 from data.datasets import prepare_datasets, create_models_config
@@ -322,21 +312,21 @@ from training.trainers import train_models
 from evaluation.trust_evaluator import enhanced_trust_ade_evaluation
 from sklearn.model_selection import train_test_split
 
-# Prepare data
+# Data preparation
 datasets = prepare_datasets()
 models_config = create_models_config()
 
-# Select dataset
+# Dataset selection
 dataset_name = 'breast_cancer'
 dataset_info = datasets[dataset_name]
 X, y = dataset_info['X'], dataset_info['y']
 
-# Split data
+# Data splitting
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.3, random_state=42, stratify=y
 )
 
-# Train models
+# Model training
 trained_models = train_models(
     X_train, X_test, y_train, y_test,
     dataset_info['feature_names'], models_config,
@@ -345,15 +335,15 @@ trained_models = train_models(
 
 # Trust-ADE evaluation
 enhanced_trust_ade_evaluation(
-    trained_models, X_test, y_test,
+    trained_models, X_test, y_test, 
     dataset_info['domain'], X_train
 )
 
-# Results available at trained_models[model_name]['trust_results']
+# Results available in trained_models[model_name]['trust_results']
 ```
 
 
-### Custom model
+### Custom Model
 
 ```python
 from models.wrappers import SklearnWrapper
@@ -363,10 +353,10 @@ from sklearn.ensemble import ExtraTreesClassifier
 custom_model = ExtraTreesClassifier(n_estimators=150, random_state=42)
 custom_model.fit(X_train, y_train)
 
-# Wrap for Trust-ADE
+# Wrapper for Trust-ADE
 wrapped_model = SklearnWrapper(
     model=custom_model,
-    feature_names=[f"feature_{i}" for i in range(X_train.shape[^1])]
+    feature_names=[f"feature_{i}" for i in range(X_train.shape[1])]
 )
 
 # Add to trained_models for evaluation
@@ -383,7 +373,7 @@ trained_models['Custom Extra Trees'] = {
 ```
 
 
-### Working with CUDA models
+### Working with CUDA Models
 
 ```python
 from models.cuda_models import OptimizedCUDAMLPClassifier
@@ -398,29 +388,27 @@ cuda_model = OptimizedCUDAMLPClassifier(
     dataset_size=len(X_train)
 )
 
-# Train
+# Training
 cuda_model.fit(X_train, y_train)
 
-# Wrap
+# Wrapper
 wrapped_cuda = CUDAMLPWrapper(cuda_model, feature_names)
 ```
 
 
-***
-
 ## ⚙️ Configuration
 
-### CUDA setup
+### CUDA Setup
 
 ```python
 # config/settings.py
 CUDA_AVAILABLE = torch.cuda.is_available()
 DEVICE = torch.device('cuda' if CUDA_AVAILABLE else 'cpu')
-CUDA_EFFICIENT_THRESHOLD = 500  # Min size for CUDA
+CUDA_EFFICIENT_THRESHOLD = 500  # Minimum size for CUDA
 ```
 
 
-### Domain configurations
+### Domain Configurations
 
 ```python
 # Weights for different domains
@@ -432,18 +420,18 @@ DOMAIN_CONFIGS = {
 ```
 
 
-***
-
 ## 📊 Visualization
 
-The system auto-generates:
+The system automatically generates 12+ types of professional charts:
 
-1. **Main comparison** - Trust Score vs Accuracy
-2. **Detailed metrics analysis** - All Trust-ADE components
-3. **CUDA vs CPU comparison** - Performance and quality
-4. **Correlation analysis** - Metric relationships
+1. **Main Comparison** - Trust Score vs Accuracy
+2. **Detailed Metrics Analysis** - All Trust-ADE components
+3. **CUDA vs CPU Comparison** - Performance and quality analysis
+4. **Correlation Analysis** - Relationships between metrics
+5. **Domain-specific Analysis** - Per-dataset breakdowns
+6. **Model Performance Heatmaps** - Comprehensive metric overview
 
-### Custom visualization
+### Custom Visualization
 
 ```python
 from visualization.charts import create_fixed_visualizations
@@ -463,31 +451,27 @@ for dataset_name, results in all_results.items():
         })
 
 df_viz = pd.DataFrame(viz_data)
-create_fixed_visualizations(df_viz, 'results', '20250822_custom')
+create_fixed_visualizations(df_viz, 'results', '20250823_custom')
 ```
 
-
-***
 
 ## 🧪 Testing
 
 ```bash
-# Installation test
+# Installation check
 python tests/test_installation.py
 
 # Basic tests
 python tests/test_basic.py
 
-# Test a module
+# Test specific module
 python -c "from training.trainers import train_models; print('✅ Trainers OK')"
 ```
 
 
-***
-
 ## 🔧 System Extension
 
-### Add new dataset
+### Adding New Dataset
 
 ```python
 # data/datasets.py
@@ -509,7 +493,7 @@ def prepare_datasets():
 ```
 
 
-### New model type
+### New Model Type
 
 ```python
 # models/your_model.py
@@ -527,36 +511,32 @@ class YourModelWrapper(SklearnWrapper):
 ```
 
 
-***
-
 ## 🚀 Usage Examples
 
-### Medical diagnosis
+### Medical Diagnosis
 
 ```bash
 python main.py --datasets breast_cancer --verbose
 ```
 
 
-### Financial analysis
+### Financial Analysis
 
 ```bash
 python main.py --datasets wine --cuda-only
 ```
 
 
-### Quick comparison
+### Quick Comparison
 
 ```bash
 python main.py --datasets iris --quick
 ```
 
 
-***
+## 📄 Execution Logs
 
-## 📄 Logs
-
-Sample detailed log:
+Example detailed log:
 
 ```
 🔬 ADVANCED ML MODEL COMPARISON WITH TRUST-ADE PROTOCOL + CUDA
@@ -567,43 +547,38 @@ Sample detailed log:
 🎯 Task type: binary
 ================================================================================
 
-  📈 Training Random Forest...
-    ✅ Random Forest trained in 0.12 sec, accuracy: 0.965
+  📈 Training XANFIS...
+    ✅ XANFIS trained in 31.28 sec, accuracy: 0.550
+    🧠 Rules extracted: 19
+    📊 Explainability: Full rule and feature importance support
 
-  📈 Training MLP Neural Network (CUDA)...
-      🚀 Using CUDA (large dataset: 398)
-      Epoch 0/200, Loss: 0.6891
-      Epoch 25/200, Loss: 0.1234
-    ✅ MLP Neural Network (CUDA) trained in 2.34 sec, accuracy: 0.971
-    🚀 CUDA acceleration used
-
-🔍 Enhanced Trust-ADE model assessment...
-  📊 Assessing Random Forest...
-    🎯 Trust Score: 0.832
-    📊 Trust level: High
-    📈 Metrics: Bias=0.023, Drift=0.045
-
-📊 BREAST_CANCER RESULTS:
-Model                              Accuracy   Trust Score  Trust Level         CUDA
-------------------------------------------------------------------------------------------
-MLP Neural Network (CUDA)          0.971      0.847        High               🚀
-Random Forest                      0.965      0.832        High               💻
+🔍 Enhanced Trust-ADE model evaluation...
+  📊 Evaluating XANFIS...
+    🎯 Trust Score: 0.863
+    📊 Trust Level: High Trust
+    📈 Metrics: Bias=0.253, Drift=0.031
 ```
 
 
-***
+## 🔬 Scientific Foundation
 
-## 🔬 Scientific Foundations
+The Trust-ADE protocol is based on research:
 
-Trust-ADE is based on the research:
-
-- **Causal interpretability** instead of mere correlations
+- **Causal interpretability** instead of correlations
 - **Dynamic monitoring** of explanation quality
-- **Integral assessment** of explainability, robustness, and fairness
-- **Compliance** with ISO/IEC 24029 and the EU AI Act
+- **Integrated assessment** of explainability, robustness and fairness
+- **Standards compliance** ISO/IEC 24029 and EU AI Act
 
 
-### Component formulas
+### Why XANFIS Achieves Higher Trust Scores
+
+1. **🧠 Rule-Based Explainability**: Unlike black-box models, XANFIS provides explicit IF-THEN rules
+2. **🔍 Causal Reasoning**: Rules represent causal relationships rather than correlations
+3. **📊 Feature Coverage**: Complete feature space coverage with interpretable membership functions
+4. **⚖️ Explanation Stability**: Rule-based explanations are inherently more stable than post-hoc methods
+5. **🎯 Human Comprehensibility**: Rules can be directly understood by domain experts
+
+### Component Formulas
 
 **Explainability Score:**
 
@@ -640,43 +615,33 @@ BSI = √(w_dp × DP_Δ² + w_eo × EO_Δ² + w_cf × CF_Δ²)
 ```
 
 
-***
-
 ## 📄 Citation
 
 If you use Trust-ADE in your research, please cite:
 
 ```bibtex
 @article{trofimov2025trust_ade,
-  title={From Correlations to Causality: The XAI 2.0 Approach and the Trust-ADE Protocol for Trustworthy AI},
-  author={Trofimov, Y.V. and Averkin, A.N. and Ilyin, A.S. and Lebedev, A.D.},
+  title={From Correlations to Causality: XAI 2.0 Approach and Trust-ADE Protocol for Trustworthy AI},
+  author={Trofimov, Yu.V. and Averkin, A.N. and Ilyin, A.S. and Lebedev, A.D.},
   journal={Journal of Explainable AI},
   year={2025}
 }
 ```
 
 
-***
-
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to your branch (`git push origin feature/amazing-feature`)
-5. Create a Pull Request
-
-***
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Create Pull Request
 
 ## 📄 License
 
-MIT License - free to use for research and commercial projects.
+MIT License - free use for research and commercial projects.
 
 ***
 
-**Trust-ADE** — Your reliable tool for building trustworthy artificial intelligence systems based on a scientifically grounded protocol for dynamic explainability, robustness, and fairness assessment! 🚀🔬
-
-<div style="text-align: center">⁂</div>
-
-[^1]: paste.txt
+**Trust-ADE** — Your reliable tool for creating trustworthy artificial intelligence systems based on a scientifically grounded protocol for dynamic assessment of explainability, robustness and fairness!
 

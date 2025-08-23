@@ -131,16 +131,16 @@ class TrustAdeCompatibleXANFIS:
             X_scaled = self.scaler.fit_transform(X)
 
             # Базовые параметры и границы
-            min_rules, max_rules = 4, 27
-            min_epochs, max_epochs = 30, 50
+            min_rules, max_rules = 6, 27
+            min_epochs, max_epochs = 30, 70
 
             n_samples=len(X)
             # Линейное масштабирование числа правил по sqrt, чтобы правила росли плавно, но не слишком быстро
-            self.num_rules = int(min(max_rules, max(min_rules, n_samples ** 0.5 // 1)))
+            self.num_rules = int(min(max_rules, max(min_rules, n_samples ** 0.4 // 1)))
 
             # Линейное масштабирование количества эпох по логарифму для плавного увеличения с ростом данных
             import math
-            self.epochs = int(min(max_epochs, max(min_epochs, math.log2(n_samples) * 10)))
+            self.epochs = int(min(max_epochs, max(min_epochs, math.log2(n_samples) * 5)))
 
             print(f"📋 Параметры: {self.num_rules} правил, {self.epochs} эпох для {n_samples} образцов\n"
                   f"Функция принадлежности: {self.mf_class}, Оптимизатор: {self.optim}")
@@ -151,7 +151,6 @@ class TrustAdeCompatibleXANFIS:
                     optim_params={
                         'epoch': self.epochs,
                         'pop_size': 40,
-                        'verbose': False
                     },
                     optim=self.optim,
                     verbose=True
