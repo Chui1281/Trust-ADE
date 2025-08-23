@@ -115,10 +115,10 @@ def create_fixed_main_comparison(df_viz, results_dir, timestamp):
             cuda_symbol = " 🚀" if cuda_flags[i] else ""
             plt.text(bar.get_x() + bar.get_width() / 2., height + 0.01,
                      f'{height:.3f}{cuda_symbol}', ha='center', va='bottom', fontweight='bold')
-        
-        plt.xlabel('Модели', fontsize=12, fontweight='bold')
-        plt.ylabel('Оценка', fontsize=12, fontweight='bold')
-        plt.title('🏆 Trust-ADE: Сравнение точности и доверия моделей', fontsize=14, fontweight='bold')
+
+        plt.xlabel('Models', fontsize=12, fontweight='bold')
+        plt.ylabel('Score', fontsize=12, fontweight='bold')
+        plt.title('🏆 Trust-ADE: Model Accuracy and Trust Score Comparison', fontsize=14, fontweight='bold')
         plt.xticks(x, models, rotation=45, ha='right')
         plt.ylim(0, 1.1)
         plt.legend(loc='upper right', fontsize=11)
@@ -138,17 +138,16 @@ def create_trust_metrics_analysis(df_viz, results_dir, timestamp):
     
     try:
         fig, axes = plt.subplots(2, 3, figsize=(18, 12))
-        fig.suptitle('🔍 Детальный анализ Trust-ADE метрик', fontsize=16, fontweight='bold')
-        
+        fig.suptitle('🔍 Detailed Trust-ADE Metrics Analysis', fontsize=16, fontweight='bold')
         metrics = [
             ('Trust_Score', 'Trust Score', 'viridis'),
-            ('Explainability', 'Объяснимость', 'Blues'),
-            ('Robustness', 'Устойчивость', 'Greens'),
-            ('Bias_Shift', 'Смещение предвзятости', 'Reds'),
-            ('Concept_Drift', 'Дрейф концептов', 'Purples'),
-            ('Training_Time', 'Время обучения (сек)', 'Oranges')
+            ('Explainability', 'Explainability', 'Blues'),
+            ('Robustness', 'Robustness', 'Greens'),
+            ('Bias_Shift', 'Bias Shift', 'Reds'),
+            ('Concept_Drift', 'Concept Drift', 'Purples'),
+            ('Training_Time', 'Training Time (s)', 'Oranges')
         ]
-        
+
         for idx, (metric, title, colormap) in enumerate(metrics):
             ax = axes[idx // 3, idx % 3]
             
@@ -194,7 +193,7 @@ def create_cuda_performance_comparison(df_viz, results_dir, timestamp):
     
     try:
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
-        fig.suptitle('🚀 CUDA vs CPU: Сравнение производительности', fontsize=16, fontweight='bold')
+        fig.suptitle('🚀 CUDA vs CPU: Performance Comparison', fontsize=16, fontweight='bold')
         
         cuda_data = df_viz[df_viz['CUDA'] == True]
         cpu_data = df_viz[df_viz['CUDA'] == False]
@@ -305,10 +304,10 @@ def create_correlation_analysis(df_viz, results_dir, timestamp):
                             square=True, linewidths=0.5, cbar_kws={"shrink": .8},
                             fmt='.3f', annot_kws={'fontweight': 'bold'})
                 
-                plt.title('🔗 Корреляционный анализ Trust-ADE метрик', 
+                plt.title('🔗 Correlation Analysis of Trust-ADE Metrics',
                           fontsize=14, fontweight='bold', pad=20)
-                plt.xlabel('Метрики', fontweight='bold')
-                plt.ylabel('Метрики', fontweight='bold')
+                plt.xlabel('Metrics', fontweight='bold')
+                plt.ylabel('Metrics', fontweight='bold')
                 plt.xticks(rotation=45, ha='right')
                 plt.yticks(rotation=0)
             else:
@@ -360,7 +359,7 @@ def create_radar_chart_comparison(df_viz, results_dir, timestamp):
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(available_metrics)
         ax.set_ylim(0, 1)
-        ax.set_title('🕸️ Радарное сравнение моделей по Trust-ADE метрикам', 
+        ax.set_title('🕸️ Radar Comparison of Models by Trust-ADE Metrics',
                      size=14, fontweight='bold', pad=20)
         ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
         ax.grid(True)
@@ -394,7 +393,7 @@ def create_performance_matrix(df_viz, results_dir, timestamp):
         
         plt.xlabel('Accuracy', fontsize=12, fontweight='bold')
         plt.ylabel('Trust Score', fontsize=12, fontweight='bold')
-        plt.title('🎯 Матрица производительности моделей\n(размер точки = время обучения)', 
+        plt.title('🎯 Model Performance Matrix\n(point size = training time)',
                   fontsize=14, fontweight='bold')
         plt.grid(True, alpha=0.3)
         
@@ -426,7 +425,7 @@ def create_dataset_comparison(df_viz, results_dir, timestamp):
             return
         
         fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-        fig.suptitle('📊 Сравнение моделей по датасетам', fontsize=16, fontweight='bold')
+        fig.suptitle('📊 Model Comparison by Dataset', fontsize=16, fontweight='bold')
         
         metrics = ['Trust_Score', 'Accuracy', 'Training_Time', 'Explainability']
         metric_titles = ['Trust Score', 'Accuracy', 'Training Time (s)', 'Explainability']
@@ -482,7 +481,7 @@ def create_metric_distributions(df_viz, results_dir, timestamp):
             return
         
         fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-        fig.suptitle('📊 Распределения Trust-ADE метрик', fontsize=16, fontweight='bold')
+        fig.suptitle('📊 Trust-ADE Metric Distributions', fontsize=16, fontweight='bold')
         
         for idx, metric in enumerate(available_metrics[:4]):
             ax = axes[idx // 2, idx % 2]
@@ -506,9 +505,9 @@ def create_metric_distributions(df_viz, results_dir, timestamp):
             ax.axvline(mean_val - std_val, color='orange', linestyle='--', alpha=0.7,
                       label=f'Mean - Std: {mean_val - std_val:.3f}')
             
-            ax.set_title(f'📈 Распределение {metric}', fontweight='bold')
+            ax.set_title(f'📈 Distribution {metric}', fontweight='bold')
             ax.set_xlabel(metric)
-            ax.set_ylabel('Плотность')
+            ax.set_ylabel('Density')
             ax.legend(fontsize=8)
             ax.grid(True, alpha=0.3)
         
@@ -534,7 +533,7 @@ def create_trust_score_breakdown(df_viz, results_dir, timestamp):
         model_stats = df_viz.groupby('Model')[available_components + ['Trust_Score']].mean()
         
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
-        fig.suptitle('🔍 Детальная разбивка Trust Score', fontsize=16, fontweight='bold')
+        fig.suptitle('🔍 Trust Score Detailed Breakdown', fontsize=16, fontweight='bold')
         
         # Stacked bar chart компонентов
         bottom = np.zeros(len(model_stats))
@@ -545,8 +544,8 @@ def create_trust_score_breakdown(df_viz, results_dir, timestamp):
                    label=component, color=colors[idx], alpha=0.8)
             bottom += model_stats[component]
         
-        ax1.set_title('📊 Компоненты Trust Score', fontweight='bold')
-        ax1.set_ylabel('Значение компонента')
+        ax1.set_title('📊 Trust Score Components', fontweight='bold')
+        ax1.set_ylabel('Component Value')
         ax1.legend()
         ax1.tick_params(axis='x', rotation=45)
         ax1.grid(True, alpha=0.3)
@@ -569,7 +568,7 @@ def create_trust_score_breakdown(df_viz, results_dir, timestamp):
             
             ax2.set_xlabel(available_components[0])
             ax2.set_ylabel(available_components[1])
-            ax2.set_title('🎯 Компоненты vs Trust Score\n(размер точки = Trust Score)', fontweight='bold')
+            ax2.set_title('🎯 Components vs Trust Score\n(point size = Trust Score)', fontweight='bold')
             ax2.grid(True, alpha=0.3)
             
             # Цветовая шкала
@@ -596,7 +595,7 @@ def create_efficiency_analysis(df_viz, results_dir, timestamp):
         df_viz['Overall_Efficiency'] = (df_viz['Trust_Score'] + df_viz['Accuracy']) / 2 / (df_viz['Training_Time'] + 0.001)
         
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
-        fig.suptitle('⚡ Анализ эффективности моделей', fontsize=16, fontweight='bold')
+        fig.suptitle('⚡ Model Efficiency Analysis', fontsize=16, fontweight='bold')
         
         # График 1: Trust Efficiency
         model_eff = df_viz.groupby('Model')['Trust_Efficiency'].mean().sort_values(ascending=False)
@@ -681,7 +680,7 @@ def create_model_ranking_chart(df_viz, results_dir, timestamp):
         rankings = model_stats.rank(ascending=False, method='min')
         
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 8))
-        fig.suptitle('🏆 Рейтинг моделей по Trust-ADE критериям', fontsize=16, fontweight='bold')
+        fig.suptitle('🏆 Model Ranking by Trust-ADE protocol', fontsize=16, fontweight='bold')
         
         # Тепловая карта рангов
         im = ax1.imshow(rankings.T, aspect='auto', cmap='RdYlGn_r', interpolation='nearest')
@@ -699,11 +698,11 @@ def create_model_ranking_chart(df_viz, results_dir, timestamp):
                         color='white' if rank > len(rankings.index)/2 else 'black',
                         fontweight='bold', fontsize=12)
         
-        ax1.set_title('📊 Матрица рангов\n(1 = лучший)', fontweight='bold')
+        ax1.set_title('📊 Rank Matrix\n(1 = best)', fontweight='bold')
         
         # Цветовая шкала
         cbar1 = plt.colorbar(im, ax=ax1, shrink=0.8)
-        cbar1.set_label('Ранг')
+        cbar1.set_label('Rank')
         
         # Общий рейтинг (средний ранг)
         overall_ranking = rankings.mean(axis=1).sort_values()
@@ -716,8 +715,8 @@ def create_model_ranking_chart(df_viz, results_dir, timestamp):
         
         ax2.set_yticks(range(len(overall_ranking)))
         ax2.set_yticklabels(overall_ranking.index)
-        ax2.set_xlabel('Средний ранг')
-        ax2.set_title('🥇 Общий рейтинг моделей\n(меньше = лучше)', fontweight='bold')
+        ax2.set_xlabel('Average Rank')
+        ax2.set_title('🥇 Overall Model Ranking\n(lower = better)', fontweight='bold')
         ax2.grid(True, alpha=0.3, axis='x')
         
         # Добавляем значения рангов
@@ -786,14 +785,14 @@ def create_detailed_heatmap(df_viz, results_dir, timestamp):
                 plt.text(j, i, text, ha='center', va='center',
                         color=color, fontweight='bold', fontsize=9)
         
-        plt.title('🌡️ Детальная тепловая карта Trust-ADE метрик\n(зеленый = лучше, красный = хуже)', 
+        plt.title('🌡️ Detailed Heatmap of Trust-ADE Metrics\n(green = better, red = worse)',
                  fontsize=14, fontweight='bold', pad=20)
-        plt.xlabel('Метрики', fontweight='bold')
-        plt.ylabel('Модели', fontweight='bold')
+        plt.xlabel('Metrics', fontweight='bold')
+        plt.ylabel('Models', fontweight='bold')
         
         # Цветовая шкала
         cbar = plt.colorbar(im, shrink=0.8)
-        cbar.set_label('Нормализованное значение (0-1)')
+        cbar.set_label('Normalized Value (0-1)')
         
         plt.tight_layout()
         plt.savefig(f'{results_dir}/detailed_heatmap_{timestamp}.png', dpi=300, bbox_inches='tight')

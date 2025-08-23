@@ -16,7 +16,7 @@ warnings.filterwarnings('ignore')
 
 # Импорт XANFIS с полной обработкой ошибок
 try:
-    from xanfis import BioAnfisClassifier, BioAnfisClassifier
+    from xanfis import BioAnfisClassifier, BioAnfisRegressor
     XANFIS_AVAILABLE = True
     print("✅ XANFIS успешно импортирован")
 except ImportError as e:
@@ -33,14 +33,14 @@ class TrustAdeCompatibleXANFIS:
     """
 
     def __init__(self, num_rules=5, mf_class="GBell", epochs=20,
-                 learning_rate=0.01, batch_size=32, random_state=42):
+                 learning_rate=0.01, batch_size=32, random_state=42, optim='OriginalPSO'):
         self.num_rules = num_rules
         self.mf_class = mf_class
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.random_state = random_state
-        self.optim = "BaseGa"
+        self.optim = optim
         # Внутренние атрибуты для Trust-ADE
         self.model = None
         self.scaler = StandardScaler()
@@ -130,53 +130,35 @@ class TrustAdeCompatibleXANFIS:
             # Нормализация данных
             X_scaled = self.scaler.fit_transform(X)
 
-            # Адаптивные параметры
-            n_samples = len(X)
-            if n_samples < 100:
-                self.num_rules = min(6, max(2, self.n_classes_ * 2))
-                self.epochs = min(60, max(25, n_samples // 4))
-            elif n_samples < 300:
-                self.num_rules = min(10, max(4, self.n_classes_ * 3))
-                self.epochs = min(120, max(60, n_samples // 8))
-            else:
-                self.num_rules = min(15, max(6, self.n_classes_ * 4))
-                self.epochs = min(180, max(120, n_samples // 15))
+            # Базовые параметры и границы
+            min_rules, max_rules = 4, 27
+            min_epochs, max_epochs = 30, 50
 
-            print(f"📋 Параметры: {self.num_rules} правил, {self.epochs} эпох для {n_samples} образцов")
+            n_samples=len(X)
+            # Линейное масштабирование числа правил по sqrt, чтобы правила росли плавно, но не слишком быстро
+            self.num_rules = int(min(max_rules, max(min_rules, n_samples ** 0.5 // 1)))
 
-            # Создание модели
-            model_created = False
+            # Линейное масштабирование количества эпох по логарифму для плавного увеличения с ростом данных
+            import math
+            self.epochs = int(min(max_epochs, max(min_epochs, math.log2(n_samples) * 10)))
 
-            if not model_created:
-                try:
-                    self.model = BioAnfisClassifier(
-                        num_rules=self.num_rules,
-                        mf_class=self.mf_class,
-                        optim="OriginalPSO",
-                        verbose=False
-                    )
-                    print(f"✅ Создан BioAnfisClassifier")
-                    model_created = True
-                except Exception as e:
-                    print(f"⚠️ BioAnfisClassifier недоступен: {e}")
-
-            if not model_created:
-                try:
-                    self.model = BioAnfisClassifier(
-                        num_rules=self.num_rules,
-                        mf_class=self.mf_class,
-                        epochs=self.epochs,
-                        batch_size=min(self.batch_size, n_samples // 4),
-                        optim="OriginalPSO",
-                        verbose=False
-                    )
-                    print(f"✅ Создан BioAnfisClassifier")
-                    model_created = True
-                except Exception as e:
-                    print(f"⚠️ BioAnfisClassifier недоступен: {e}")
-
-            if not model_created:
-                raise RuntimeError("Не удалось создать ни одну XANFIS модель")
+            print(f"📋 Параметры: {self.num_rules} правил, {self.epochs} эпох для {n_samples} образцов\n"
+                  f"Функция принадлежности: {self.mf_class}, Оптимизатор: {self.optim}")
+            try:
+                self.model = BioAnfisClassifier(
+                    num_rules=self.num_rules,
+                    mf_class=self.mf_class,
+                    optim_params={
+                        'epoch': self.epochs,
+                        'pop_size': 40,
+                        'verbose': False
+                    },
+                    optim=self.optim,
+                    verbose=True
+                )
+                print(f"✅ Создан BioAnfisClassifier")
+            except Exception as e:
+                print(f"⚠️ BioAnfisClassifier недоступен: {e}")
 
             # Обучение
             start_time = time.time()
@@ -370,7 +352,7 @@ class TrustAdeXANFISWrapper:
             }
 
 
-def train_improved_xanfis_model(X_train, X_test, y_train, y_test, dataset_name, feature_names):
+def train_improved_xanfis_model(X_train, X_test, y_train, y_test, dataset_name, feature_names,dataset_type):
     """Обучение улучшенного XANFIS с исправленными ошибками"""
 
     if not XANFIS_AVAILABLE:
@@ -386,14 +368,19 @@ def train_improved_xanfis_model(X_train, X_test, y_train, y_test, dataset_name, 
         print(f"📊 Данные: {n_samples} образцов, {n_features} признаков, {n_classes} классов")
 
         start_time = time.time()
-
+        optim = "OriginalPSO"
+        mf_class = 'GBell'
+        if dataset_name=='wine':
+            optim='BaseGA'
+            mf_class='Sigmoid'
         xanfis_model = TrustAdeCompatibleXANFIS(
-            num_rules=min(12, max(4, n_classes * 3)),
-            mf_class="Gaussian",
-            epochs=min(150, max(60, n_samples // 8)),
+            num_rules=max(12, max(4, n_classes * 11)),
+            mf_class=mf_class,
+            epochs=min(100, max(60, n_samples // 8)),
             learning_rate=0.01,
             batch_size=min(64, max(16, n_samples // 10)),
-            random_state=42
+            random_state=42,
+            optim=optim
         )
 
         # Обучение

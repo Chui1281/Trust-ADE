@@ -23,7 +23,6 @@ if XANFIS_AVAILABLE:
         print("✅ Улучшенный XANFIS загружен из models/")
     except ImportError as e:
         print(f"⚠️ Не удалось загрузить улучшенный XANFIS: {e}")
-        from xanfis import AnfisClassifier, GdAnfisClassifier
         ENHANCED_XANFIS_AVAILABLE = False
 else:
     ENHANCED_XANFIS_AVAILABLE = False
@@ -44,7 +43,7 @@ def train_fixed_xanfis_model(X_train, X_test, y_train, y_test, dataset_name, dat
 
         # Вызываем улучшенную функцию обучения
         wrapped_xanfis, scaler, accuracy, training_time = train_improved_xanfis_model(
-            X_train, X_test, y_train, y_test, dataset_name, feature_names
+            X_train, X_test, y_train, y_test, dataset_name, feature_names,dataset_type
         )
 
         if wrapped_xanfis and accuracy > 0.1:
@@ -53,106 +52,6 @@ def train_fixed_xanfis_model(X_train, X_test, y_train, y_test, dataset_name, dat
             print(f"      ⏱️ Время: {training_time:.2f}s")
             print(f"      🧠 Правил: {len(wrapped_xanfis.get_fuzzy_rules())}")
             return wrapped_xanfis, scaler, accuracy, training_time
-        else:
-            print(f"      ❌ Улучшенный XANFIS не удалось обучить должным образом")
-            # Возвращаемся к старой версии
-            return _train_legacy_xanfis(X_train, X_test, y_train, y_test, dataset_name, dataset_type)
-    else:
-        # Используем старую версию
-        print(f"    🔧 Обучение базового XANFIS на {dataset_name}...")
-        return _train_legacy_xanfis(X_train, X_test, y_train, y_test, dataset_name, dataset_type)
-
-
-def _train_legacy_xanfis(X_train, X_test, y_train, y_test, dataset_name, dataset_type):
-    """Старая версия обучения XANFIS (fallback)"""
-
-    try:
-        # Подготовка данных
-        scaler = StandardScaler()
-        X_train_scaled = scaler.fit_transform(X_train)
-        X_test_scaled = scaler.transform(X_test)
-
-        # Адаптивные параметры
-        n_samples, n_features = X_train.shape
-        n_classes = len(np.unique(y_train))
-
-        # Оптимизация количества правил
-        if n_samples < 100:
-            n_rules = min(5, max(2, n_classes))
-        elif n_samples < 300:
-            n_rules = min(8, max(3, n_classes * 2))
-        else:
-            n_rules = min(12, max(4, n_classes * 3))
-
-        print(f"      📋 Параметры: {n_rules} правил для {n_samples} образцов")
-
-        start_time = time.time()
-
-        try:
-            # Пробуем AnfisClassifier
-            xanfis_model = AnfisClassifier(
-                num_rules=n_rules,
-                mf_class="Gaussian",
-                verbose=False  # Изменили на False чтобы уменьшить вывод
-            )
-            print(f"      🔧 Используем AnfisClassifier")
-
-        except Exception as anfis_error:
-            print(f"      ⚠️ AnfisClassifier ошибка: {anfis_error}")
-
-            # Пробуем GdAnfisClassifier
-            try:
-                xanfis_model = GdAnfisClassifier(
-                    num_rules=n_rules,
-                    mf_class="Gaussian",
-                    epochs=min(50, max(20, n_samples // 10)),
-                    batch_size=min(32, max(8, n_samples // 20)),
-                    optim="Adam",
-                    verbose=False
-                )
-                print(f"      🔧 Используем GdAnfisClassifier")
-
-            except Exception as gd_error:
-                print(f"      ❌ GdAnfisClassifier ошибка: {gd_error}")
-                return None, None, 0.0, 0.0
-
-        # Обучение модели
-        if n_samples < 50:
-            noise_scale = 0.01 * np.std(X_train_scaled)
-            X_train_noisy = X_train_scaled + np.random.normal(0, noise_scale, X_train_scaled.shape)
-            xanfis_model.fit(X_train_noisy, y_train)
-        else:
-            xanfis_model.fit(X_train_scaled, y_train)
-
-        training_time = time.time() - start_time
-
-        # Создание обертки (используем старый wrapper для совместимости)
-        wrapped_xanfis = FixedXANFISWrapper(
-            xanfis_model,
-            feature_names=[f"feature_{i}" for i in range(n_features)],
-            scaler=scaler
-        )
-
-        # Проверка точности
-        y_pred = wrapped_xanfis.predict(X_test)
-
-        if len(y_pred) == len(y_test) and not np.all(y_pred == 0):
-            accuracy = accuracy_score(y_test, y_pred)
-        else:
-            print(f"      ⚠️ XANFIS дает некорректные предсказания")
-            accuracy = 0.0
-
-        if accuracy > 0.1:
-            print(f"      ✅ Базовый XANFIS обучен за {training_time:.2f} сек, точность: {accuracy:.3f}")
-            return wrapped_xanfis, scaler, accuracy, training_time
-        else:
-            print(f"      ❌ XANFIS показал слишком низкую точность: {accuracy:.3f}")
-            return None, None, 0.0, 0.0
-
-    except Exception as e:
-        print(f"      ❌ Критическая ошибка базового XANFIS: {str(e)}")
-        return None, None, 0.0, 0.0
-
 
 def train_models(X_train, X_test, y_train, y_test, feature_names, models_config, dataset_type, dataset_name):
     """Обучение всех моделей включая улучшенный XANFIS и CUDA"""
